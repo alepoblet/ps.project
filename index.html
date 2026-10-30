@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#13305a">
+<title>Pasaporte Lagos y Volcanes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root { --navy:#13305a; --navy-2:#1d4478; --gold:#c9a24a; --gold-2:#f3dc95; --paper:#f7efdc; --cream:#fffdf7; --ink:#2a2118; --muted:#7a6a52; --line:#cdb994; --ok:#2e6b3f; --err:#a4342a; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; }
+body { margin:0; font-family: Lato, system-ui, -apple-system, sans-serif; color:var(--ink); overflow:hidden;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320' preserveAspectRatio='none'><path fill='%230b2143' fill-opacity='.75' d='M0 220 L180 120 L330 200 L500 90 L700 210 L880 110 L1060 200 L1240 100 L1440 190 L1440 320 L0 320Z'/><path fill='%23091a33' d='M0 270 L220 200 L420 260 L640 190 L860 265 L1080 205 L1300 260 L1440 230 L1440 320 L0 320Z'/></svg>") no-repeat bottom / 100% 40vh,
+    radial-gradient(circle at 15% 0%, #2d6aa3 0%, #13305a 50%, #091a33 100%); }
+body::before, body::after { content:""; position:fixed; border-radius:50%; filter:blur(60px); opacity:.35; pointer-events:none; z-index:0; }
+body::before { width:260px; height:260px; background:#e9b949; top:-80px; right:-60px; animation: drift 9s ease-in-out infinite; }
+body::after { width:300px; height:300px; background:#2e8bc0; bottom:-120px; left:-80px; animation: drift 12s ease-in-out infinite reverse; }
+@keyframes drift { 50% { transform: translate(30px,40px); } }
+h1, h2, h3, .big { font-family: "Playfair Display", Georgia, serif; }
+
+.stage { position:relative; z-index:1; height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  padding: calc(env(safe-area-inset-top,0px) + 10px) 12px calc(env(safe-area-inset-bottom,0px) + 10px); }
+.topbar { color:#dbe6f6; font-size:.85rem; text-align:center; width:min(92vw,420px); visibility:hidden; }
+.topbar.show { visibility:visible; }
+.topbar .mini { height:8px; background:rgba(255,255,255,.2); border-radius:99px; margin-top:6px; overflow:hidden; }
+.topbar .mini > div { height:100%; width:0; background:linear-gradient(90deg,#f3dc95,#fff3c4); transition:width .9s; border-radius:99px; }
+
+/* LIBRO */
+.scene { perspective:1600px; width:min(92vw,420px); height:min(calc(100dvh - 150px), 680px); min-height:460px; position:relative; }
+.book { position:absolute; inset:0; transform-style:preserve-3d; }
+.inner { position:absolute; inset:0; background:var(--paper); border-radius:6px 14px 14px 6px; box-shadow:0 20px 50px rgba(0,0,0,.5); overflow:hidden; display:flex; flex-direction:column; }
+.cover { position:absolute; inset:0; transform-origin:left center; transition:transform 1.1s cubic-bezier(.6,.05,.2,1); transform-style:preserve-3d; z-index:3; cursor:pointer; }
+.cover.opened { transform:rotateY(-155deg); pointer-events:none; }
+.cover .front, .cover .back { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:6px 14px 14px 6px; }
+.cover .front { background:linear-gradient(160deg,#1d4478 0%,#13305a 60%,#0c2143 100%); border:3px solid var(--gold); color:var(--gold-2); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; overflow:hidden; }
+.cover .front::before { content:""; position:absolute; inset:12px; border:1px dashed rgba(201,162,74,.6); border-radius:10px; }
+.cover .front::after { content:""; position:absolute; top:-50%; left:-60%; width:40%; height:200%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transform:rotate(20deg); animation:shine 4s ease-in-out infinite; }
+@keyframes shine { 0%,55% { left:-60%; } 100% { left:130%; } }
+.cover .back { background:var(--paper); transform:rotateY(180deg); }
+.cover .escudo { width:96px; height:96px; animation:float 3.6s ease-in-out infinite; }
+.cover h1 { margin:10px 0 0; font-size:clamp(2rem,9vw,2.8rem); letter-spacing:.2em; text-transform:uppercase; }
+.cover .sub { margin:4px 0 0; letter-spacing:.14em; text-transform:uppercase; font-size:.9rem; color:#dbe6f6; }
+.cover .hint-open { margin-top:26px; font-size:.95rem; color:var(--gold-2); animation:pulse 1.6s ease-in-out infinite; }
+@keyframes float { 50% { transform:translateY(-8px) rotate(2deg); } }
+@keyframes pulse { 50% { opacity:.35; } }
+
+.leaves { position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; }
+.leaf { display:none; flex:1; min-height:0; flex-direction:column; padding:18px 18px 12px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  background-image:repeating-linear-gradient(0deg,transparent 0 31px,rgba(160,130,80,.08) 31px 32px), radial-gradient(ellipse at top left,#fffaf0,var(--paper) 75%); }
+.leaf.on { display:flex; animation:turn .7s cubic-bezier(.2,.8,.2,1); transform-origin:left center; }
+@keyframes turn { from { transform:perspective(1200px) rotateY(-70deg); opacity:0; } to { transform:none; opacity:1; } }
+.leaf h2 { margin:0 0 4px; font-size:1.35rem; color:var(--navy); text-transform:uppercase; letter-spacing:.05em; }
+.sec { font-size:.75rem; letter-spacing:.2em; color:#a9832f; text-transform:uppercase; margin:0; font-weight:700; }
+.rule { border:0; border-top:2px double var(--line); margin:8px 0 10px; }
+.hint { color:var(--muted); font-size:.92rem; margin:4px 0 10px; line-height:1.4; }
+label { font-size:.82rem; color:var(--muted); display:block; margin:8px 0 4px; }
+input { width:100%; padding:14px; border-radius:12px; border:1.5px solid var(--line); background:var(--cream); color:var(--ink); font:inherit; font-size:16px; }
+input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 4px rgba(201,162,74,.25); }
+.btn { width:100%; padding:15px; margin-top:12px; border:0; border-radius:14px; background:linear-gradient(180deg,#1d4478,#13305a); color:var(--gold-2); font:inherit; font-size:1.05rem; letter-spacing:.05em; cursor:pointer; box-shadow:0 5px 0 #0a1d38,0 10px 18px rgba(0,0,0,.2); transition:transform .08s,box-shadow .08s; min-height:52px; }
+.btn:active { transform:translateY(4px); box-shadow:0 1px 0 #0a1d38; }
+.btn:disabled { opacity:.5; }
+.msg { margin-top:12px; font-weight:700; min-height:1.4em; font-size:.98rem; }
+.msg.ok { color:var(--ok); } .msg.err { color:var(--err); }
+.demo { font-family:ui-monospace,Menlo,monospace; font-size:.8rem; background:var(--cream); border:1px dashed var(--line); border-radius:10px; padding:10px; color:var(--muted); margin-top:12px; word-break:break-all; }
+
+/* ESTAMPAS */
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; flex:1; min-height:0; }
+.estampa { perspective:900px; min-height:0; cursor:pointer; user-select:none; position:relative; }
+.estampa.bloqueada { cursor:not-allowed; }
+.estampa-in { position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .75s cubic-bezier(.3,.7,.2,1); }
+.estampa.girada .estampa-in { transform:rotateY(180deg); }
+.face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border-radius:12px; padding:10px 8px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.frente { background:linear-gradient(145deg,#fffdf7 0%,#f6ecd2 100%); border:3px solid #e0c98f; box-shadow:0 8px 18px rgba(40,25,5,.25), inset 0 0 0 4px #fffdf7; }
+.frente::before { content:""; position:absolute; inset:5px; border:1.5px dashed rgba(122,106,82,.45); border-radius:8px; pointer-events:none; }
+.frente.vacia { background:repeating-linear-gradient(45deg,#efe5cd 0 8px,#e6dbc0 8px 16px); border-style:dashed; border-color:#b8a77f; box-shadow:none; }
+.frente.vacia::before { border-color:rgba(122,106,82,.3); }
+.estampa:nth-child(odd) .frente { transform:rotate(-1.5deg); }
+.estampa:nth-child(even) .frente { transform:rotate(1.2deg); }
+.dorso { transform:rotateY(180deg); background:var(--paper); border:3px solid #e0c98f; box-shadow:0 8px 18px rgba(40,25,5,.25); justify-content:flex-start; overflow-y:auto; padding:12px 10px; }
+.dorso.info { background:#fbf4e2; }
+.emblema { width:min(56%,96px); aspect-ratio:1; margin:auto 0; }
+.emblema svg { width:100%; height:100%; display:block; filter:url(#ink); }
+.nombre { margin-top:4px; font-size:.84rem; font-weight:700; color:var(--navy); line-height:1.15; }
+.region { font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+.etiqueta { font-size:.7rem; color:var(--muted); margin-top:auto; letter-spacing:.04em; }
+.numero { position:absolute; top:8px; left:12px; font-size:.7rem; color:var(--muted); z-index:2; }
+.vacia .emblema, .vacia .nombre { opacity:.35; filter:grayscale(1); }
+.dorso h3 { margin:4px 0 2px; font-size:.95rem; color:var(--navy); }
+.dorso p { margin:4px 0; font-size:.8rem; line-height:1.35; text-align:left; width:100%; }
+.dorso .lbl { font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-top:auto; }
+.dorso .fecha { font-size:1.05rem; color:#7a2e1e; font-weight:700; margin-top:4px; }
+.dorso .sello-fecha { margin-top:10px; border:2px dashed #a3262a; color:#a3262a; border-radius:8px; padding:5px 10px; transform:rotate(-4deg); font-weight:700; font-size:.8rem; }
+.dorso .pie { margin-top:auto; font-size:.66rem; color:var(--muted); }
+.estampa.nueva .face.frente { animation:tiembla .5s .7s both; }
+.estampa.nueva .emblema { animation:thud .8s cubic-bezier(.2,.8,.2,1) .2s both; mix-blend-mode:multiply; }
+@keyframes thud { 0% { transform:scale(2.4) rotate(-25deg); opacity:0; } 55% { transform:scale(.9) rotate(-8deg); opacity:.95; } 75% { transform:scale(1.04) rotate(-4deg); } 100% { transform:scale(1) rotate(-4deg); opacity:.92; } }
+@keyframes tiembla { 25% { transform:translate(-2px,2px); } 50% { transform:translate(2px,-1px); } 75% { transform:translate(-1px,1px); } }
+@keyframes no { 20%,60% { transform:translateX(-4px); } 40%,80% { transform:translateX(4px); } }
+.estampa.sacudir { animation:no .45s; }
+
+/* PREMIOS */
+.ring-wrap { position:relative; width:170px; height:170px; margin:6px auto 4px; }
+.ring { width:170px; height:170px; display:block; }
+.ring circle { fill:none; stroke-width:12; }
+.ring .track { stroke:#e6dbc2; }
+.ring .fill { stroke:url(#oro); stroke-linecap:round; transform:rotate(-90deg); transform-origin:60px 60px; transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+.ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
+.ring-text b { font-family:"Playfair Display",Georgia,serif; font-size:2.4rem; color:var(--navy); display:block; line-height:1; }
+.ring-text small { font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.ribbons { display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.ribbon { padding:12px 14px; border-radius:12px; border:2px dashed var(--line); color:var(--muted); background:var(--cream); font-size:.94rem; transition:all .4s; }
+.ribbon.unlocked { background:linear-gradient(135deg,var(--gold),#f3dc95); color:var(--navy); border:2px solid #a9832f; font-weight:700; animation:glow 1.8s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow:0 0 0 6px rgba(201,162,74,.25); } }
+
+/* NAV */
+.nav { position:relative; z-index:2; width:min(92vw,420px); display:flex; align-items:center; justify-content:space-between; gap:8px; visibility:hidden; }
+.nav.show { visibility:visible; }
+.nav button { background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:10px 14px; font:inherit; font-size:.9rem; min-height:44px; cursor:pointer; }
+.nav button:disabled { opacity:.35; }
+.dots { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; }
+.dots button { width:12px; height:12px; min-height:0; padding:0; border-radius:50%; background:rgba(255,255,255,.3); border:0; transition:all .3s; }
+.dots button.on { background:var(--gold-2); transform:scale(1.35); }
+
+.burst { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:20; }
+.burst i { position:absolute; top:-20px; width:10px; height:14px; border-radius:2px; animation:fall 2.4s ease-in forwards; }
+@keyframes fall { to { transform:translateY(110vh) rotate(760deg); opacity:.2; } }
+@media (min-width:700px) { .scene { width:440px; } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="ink"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter>
+    <linearGradient id="oro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9a24a"/><stop offset="1" stop-color="#fff3c4"/></linearGradient>
+  </defs>
+</svg>
+
+<div class="stage">
+  <div class="topbar" id="topbar"><span id="topTexto">0 de 12 estampas</span><div class="mini"><div id="topBarra"></div></div></div>
+
+  <div class="scene">
+    <div class="book">
+      <div class="inner">
+        <div class="leaves" id="hojas">
+
+          <section class="leaf" data-title="Registro">
+            <p class="sec">Paso 1</p>
+            <h2>Emite tu pasaporte</h2>
+            <hr class="rule">
+            <p class="hint">Escribe tu nombre para empezar a coleccionar estampas. El correo es opcional.</p>
+            <form id="formRegistro">
+              <label for="nombre">Nombre completo</label>
+              <input id="nombre" autocomplete="name" maxlength="60" required>
+              <label for="correo">Correo (opcional)</label>
+              <input id="correo" type="email" autocomplete="email">
+              <button class="btn" type="submit">Emitir mi pasaporte</button>
+            </form>
+          </section>
+
+          <section class="leaf" data-title="Volcanes">
+            <p class="sec">Sección 1 de 3</p>
+            <h2>Volcanes</h2>
+            <p class="hint">Montañas activas y conos nevados. Toca una estampa para ver cuándo la obtuviste, y otra vez para conocer el lugar.</p>
+            <div class="grid" id="gridVol"></div>
+          </section>
+
+          <section class="leaf" data-title="Parques y lagos">
+            <p class="sec">Sección 2 de 3</p>
+            <h2>Parques y lagos</h2>
+            <p class="hint">Bosques, lagos y reservas. Toca una estampa para ver cuándo la obtuviste, y otra vez para conocer el lugar.</p>
+            <div class="grid" id="gridPar"></div>
+          </section>
+
+          <section class="leaf" data-title="Museos y cultura">
+            <p class="sec">Sección 3 de 3</p>
+            <h2>Museos y cultura</h2>
+            <p class="hint">Historia, colonización y cultura viva. Toca una estampa para ver cuándo la obtuviste, y otra vez para conocer el lugar.</p>
+            <div class="grid" id="gridMus"></div>
+          </section>
+
+          <section class="leaf" data-title="Sellar">
+            <p class="sec">Paso 2</p>
+            <h2>Sellar con código</h2>
+            <hr class="rule">
+            <p class="hint">Pide el código al guardabosques o en el punto del lugar. Es de uso único y sirve solo para ese sello. Si no tienes señal, puedes canjearlo después.</p>
+            <form id="formCanje">
+              <label for="codigo">Código</label>
+              <input id="codigo" placeholder="LV-QUE-XXXX" maxlength="20" autocomplete="off" autocapitalize="characters" required>
+              <button class="btn" type="submit">Sellar</button>
+            </form>
+            <div class="msg" id="mensajeCanje" aria-live="polite"></div>
+            <div class="demo" id="codigosDemo"></div>
+          </section>
+
+          <section class="leaf" data-title="Premios">
+            <p class="sec">Tu recorrido</p>
+            <h2>Progreso y premios</h2>
+            <hr class="rule">
+            <div class="ring-wrap">
+              <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="track" cx="60" cy="60" r="52"/>
+                <circle class="fill" id="anillo" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+              </svg>
+              <div class="ring-text"><b id="conteo">0</b><small>de 12 estampas</small></div>
+            </div>
+            <div class="ribbons">
+              <div class="ribbon" id="premio6">Completa 6 estampas y obtén descuento en entradas a parques.</div>
+              <div class="ribbon" id="premio12">Completa las 12 y recibe la insignia de viajero completo.</div>
+            </div>
+          </section>
+
+          <section class="leaf" data-title="Constancia">
+            <p class="sec">Recuerdo</p>
+            <h2>Tu constancia</h2>
+            <hr class="rule">
+            <p class="hint">Descarga tu pasaporte como imagen para guardarlo o compartirlo.</p>
+            <button class="btn" id="descargar">Descargar constancia</button>
+          </section>
+        </div>
+      </div>
+
+      <div class="cover" id="portada">
+        <div class="front">
+          <svg class="escudo" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M50 6 L88 20 L88 52 Q88 80 50 96 Q12 80 12 52 L12 20 Z" fill="none" stroke="#c9a24a" stroke-width="3"/>
+            <path d="M22 60 L40 34 L52 52 L60 42 L78 62 Z" fill="#f3dc95"/>
+            <path d="M20 72 Q35 64 50 72 T80 72" fill="none" stroke="#f3dc95" stroke-width="2.5"/>
+          </svg>
+          <h1>Pasaporte</h1>
+          <p class="sub">Lagos y Volcanes</p>
+          <p class="hint-open">Toca para abrir</p>
+        </div>
+        <div class="back"></div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <button id="ant" aria-label="Página anterior">← Anterior</button>
+    <div class="dots" id="dots"></div>
+    <button id="sig" aria-label="Página siguiente">Siguiente →</button>
+  </nav>
+</div>
+<div id="fiesta"></div>
+
+<script>
+const SELLOS = [
+  { id:'QUE', cat:'vol', nombre:'Volcán Quetrupillán', region:'La Araucanía', color:'#8b3a1e', info:'Entre los volcanes Villarrica y Lanín. Su nombre significa "volcán activo bramador". Ideal para trekking; lleva abrigo y agua.', emblema:'<path d="M14 80 L50 18 L86 80 Z" fill="currentColor"/><path d="M40 80 L50 52 L60 80 Z" fill="#fffdf7"/>' },
+  { id:'TOL', cat:'vol', nombre:'Volcán Tolhuaca', region:'La Araucanía', color:'#4f6b2a', info:'A los pies de la cordillera de los Andes, rodeado de bosques y áreas naturales. Ideal para caminatas tranquilas y fotografía.', emblema:'<path d="M10 78 L38 36 L52 56 L64 40 L92 78 Z" fill="currentColor"/><circle cx="72" cy="26" r="9" fill="currentColor" opacity=".6"/>' },
+  { id:'VIL', cat:'vol', nombre:'Volcán Villarrica', region:'La Araucanía', color:'#a3262a', info:'Protege el volcán Villarrica, bosques de robles y cuevas volcánicas. Revisa el estado de los senderos antes de ir.', emblema:'<path d="M20 82 L50 24 L80 82 Z" fill="currentColor"/><path d="M42 24 Q50 6 58 24 Q52 18 50 12 Q48 18 42 24 Z" fill="currentColor" opacity=".7"/>' },
+  { id:'OSO', cat:'vol', nombre:'Volcán Osorno', region:'Los Lagos', color:'#506f8e', info:'Forma cónica característica del sur, con nieves y paisajes junto al Lago Llanquihue. Marca el inicio de la Patagonia chilena.', emblema:'<path d="M10 82 L50 14 L90 82 Z" fill="currentColor"/><path d="M36 38 L50 14 L64 38 Q50 34 36 38 Z" fill="#fffdf7"/>' },
+  { id:'PUY', cat:'par', nombre:'Parque Nacional Puyehue', region:'Los Lagos', color:'#a0522d', info:'Bosques siempreverdes, complejos termales y el volcán Puyehue. Un buen lugar para descansar después de una caminata.', emblema:'<path d="M30 84 L50 40 L70 84 Z" fill="currentColor"/><path d="M42 30 Q36 22 44 14 M54 30 Q48 20 56 12 M66 32 Q60 24 68 16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>' },
+  { id:'MOC', cat:'par', nombre:'Reserva Mocho-Choshuenco', region:'Los Ríos', color:'#4a6fa5', info:'Volcanes Mocho y Choshuenco, con glaciares y campos de nieve. Lleva equipo adecuado, sobre todo en invierno.', emblema:'<path d="M6 80 L30 34 L46 80 Z" fill="currentColor"/><path d="M40 80 L66 26 L94 80 Z" fill="currentColor" opacity=".75"/><path d="M24 44 L30 34 L36 44 Z" fill="#fffdf7"/><path d="M60 36 L66 26 L72 36 Z" fill="#fffdf7"/>' },
+  { id:'HUI', cat:'par', nombre:'Reserva Huilo Huilo', region:'Los Ríos', color:'#3d7a4a', info:'Bosque templado y refugio del huemul, un ciervo en peligro de extinción. Respeta los senderos y la fauna.', emblema:'<path d="M50 10 Q86 40 72 74 Q60 88 50 90 Q40 88 28 74 Q14 40 50 10 Z" fill="currentColor"/><path d="M50 22 L50 84" stroke="#fffdf7" stroke-width="3"/><path d="M50 40 L36 52 M50 56 L64 66" stroke="#fffdf7" stroke-width="2.5"/>' },
+  { id:'RAN', cat:'par', nombre:'Lago Ranco', region:'Los Ríos', color:'#1e6fa8', info:'Tercer lago más extenso de Chile, con paisajes cordilleranos y bosques. Muy buen lugar para navegar, pescar y contemplar.', emblema:'<path d="M8 40 Q20 30 32 40 T56 40 T80 40 T92 40" stroke="currentColor" stroke-width="5" fill="none"/><path d="M8 60 Q20 50 32 60 T56 60 T80 60 T92 60" stroke="currentColor" stroke-width="5" fill="none"/><path d="M8 80 Q20 70 32 80 T56 80 T80 80 T92 80" stroke="currentColor" stroke-width="5" fill="none"/>' },
+  { id:'LLA', cat:'par', nombre:'Lago Llanquihue', region:'Los Lagos', color:'#0f5e8c', info:'Segundo lago más grande de Chile, con los volcanes Osorno, Calbuco, Puntiagudo y Tronador en su entorno. Ideal para contemplar y fotografiar.', emblema:'<circle cx="50" cy="50" r="36" fill="none" stroke="currentColor" stroke-width="4"/><path d="M22 58 Q32 50 42 58 T62 58 T82 58" stroke="currentColor" stroke-width="5" fill="none"/><path d="M30 42 Q40 36 50 42 T70 42" stroke="currentColor" stroke-width="3" fill="none"/>' },
+  { id:'MUS', cat:'mus', nombre:'Museo Colonial Alemán', region:'Los Lagos', color:'#7a4e2d', info:'Av. Vicente Pérez Rosales 490, Frutillar. Historia de la colonización alemana desde 1852, con edificaciones, colecciones y áreas verdes.', emblema:'<path d="M50 12 L88 36 L12 36 Z" fill="currentColor"/><rect x="18" y="40" width="64" height="6" fill="currentColor"/><rect x="24" y="50" width="6" height="28" fill="currentColor"/><rect x="40" y="50" width="6" height="28" fill="currentColor"/><rect x="56" y="50" width="6" height="28" fill="currentColor"/><rect x="12" y="80" width="76" height="6" fill="currentColor"/>' },
+  { id:'TEM', cat:'mus', nombre:'Templo Luterano', region:'Los Lagos', color:'#6b4f3a', info:'Puerto Varas. Iglesia de madera de la década de 1920, que mezcla la arquitectura europea con la carpintería de los colonos alemanes.', emblema:'<path d="M50 14 L70 40 L70 84 L30 84 L30 40 Z" fill="currentColor"/><path d="M50 14 L50 4" stroke="currentColor" stroke-width="3"/><path d="M46 10 H54" stroke="currentColor" stroke-width="3"/><path d="M44 52 H56 M50 46 V60" stroke="#fffdf7" stroke-width="3"/>' },
+  { id:'PEW', cat:'mus', nombre:'Rutas Ancestrales Pewenche', region:'La Araucanía', color:'#2f6b3a', info:'Experiencia con comunidades pewenche que comparten su cultura y su conocimiento del territorio. Respeta sus normas y sus tiempos.', emblema:'<rect x="46" y="60" width="8" height="24" fill="currentColor"/><path d="M50 14 L70 42 L58 42 L78 64 L22 64 L42 42 L30 42 Z" fill="currentColor"/>' }
+];
+const SECCIONES = [
+  { cat:'vol', titulo:'Volcanes', sub:'Montañas activas y conos nevados', grid:'gridVol' },
+  { cat:'par', titulo:'Parques y lagos', sub:'Bosques, lagos y reservas', grid:'gridPar' },
+  { cat:'mus', titulo:'Museos y cultura', sub:'Historia, colonización y cultura viva', grid:'gridMus' }
+];
+const META_DESCUENTO = 6, META_TOTAL = SELLOS.length;
+const MASTER = 'LV-TEST-2026'; // código de prueba: desbloquea todas las estampas
+const KEY = 'pasaporte-lagos-volcanes-v1';
+
+const CODIGOS = {};
+SELLOS.forEach((s, i) => { CODIGOS['LV-' + s.id + '-' + (1000 + i * 37).toString(36).toUpperCase()] = s.id; });
+
+let viajero = '', numero = '', fecha = '', pagina = 0, abierto = false, inicioX = null;
+let sellados = new Map(); // id -> fecha de obtención
+let usados = new Set();   // códigos ya canjeados
+
+const $ = id => document.getElementById(id);
+const hojas = [...document.querySelectorAll('.leaf')];
+const fechaHoy = () => new Date().toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' });
+
+// Persistencia por dispositivo (si el navegador lo permite)
+function guardar() {
+  try { localStorage.setItem(KEY, JSON.stringify({ viajero, numero, fecha, sellados: [...sellados], usados: [...usados] })); } catch (e) {}
+}
+function cargar() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (!d || !d.viajero) return false;
+    ({ viajero, numero, fecha } = d);
+    sellados = new Map(d.sellados); usados = new Set(d.usados);
+    return true;
+  } catch (e) { return false; }
+}
+
+function abrirLibro() {
+  if (abierto) return;
+  abierto = true;
+  $('portada').classList.add('opened');
+  setTimeout(() => {
+    $('nav').classList.add('show');
+    $('topbar').classList.add('show');
+    mostrar(viajero ? 1 : 0);
+  }, 700);
+}
+$('portada').addEventListener('click', abrirLibro);
+
+function svgSello(s) {
+  return `<svg viewBox="0 0 100 100" style="color:${s.color}" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-width="3"/>
+    <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/>
+    <g transform="translate(16 16) scale(.68)">${s.emblema}</g></svg>`;
+}
+
+// Cada estampa: frente, dorso con fecha y dorso con información
+function crearEstampa(s, n, nueva) {
+  const obtenida = sellados.has(s.id);
+  const div = document.createElement('div');
+  div.className = 'estampa' + (obtenida ? '' : ' bloqueada') + (nueva ? ' nueva' : '');
+  div.dataset.id = s.id;
+  div.dataset.vista = '0';
+  div.innerHTML = `<div class="estampa-in">
+    <div class="face frente ${obtenida ? '' : 'vacia'}">
+      <span class="numero">${n}</span>
+      <div class="emblema">${svgSello(s)}</div>
+      <div class="nombre"></div>
+      <div class="region">${s.region}</div>
+      <div class="etiqueta">${obtenida ? 'Toca para ver' : 'Por descubrir'}</div>
+    </div>
+    <div class="face dorso"></div>
+  </div>`;
+  div.querySelector('.nombre').textContent = obtenida ? s.nombre : '???';
+  div.addEventListener('click', () => tocarEstampa(div, s));
+  return div;
+}
+
+function pintarDorso(div, s, vista) {
+  const dorso = div.querySelector('.dorso');
+  dorso.classList.toggle('info', vista === 2);
+  dorso.innerHTML = '';
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; e.textContent = txt; return e; };
+  if (vista === 1) {
+    dorso.append(el('div', 'lbl', 'Obtenida el'), el('div', 'fecha', sellados.get(s.id)),
+      el('div', 'sello-fecha', '✔ SELLADO'), el('div', 'pie', 'Toca otra vez para conocer el lugar'));
+  } else {
+    dorso.append(el('h3', '', s.nombre), el('p', '', s.region), el('p', '', s.info), el('div', 'pie', 'Toca para volver a la estampa'));
+  }
+}
+
+function tocarEstampa(div, s) {
+  if (!sellados.has(s.id)) {
+    div.classList.remove('sacudir'); void div.offsetWidth; div.classList.add('sacudir');
+    mensajeFlotante('Aún no tienes esta estampa. Pide su código en el lugar.');
+    return;
+  }
+  const vista = Number(div.dataset.vista);
+  if (vista === 0) { pintarDorso(div, s, 1); div.dataset.vista = '1'; div.classList.add('girada'); }
+  else if (vista === 1) { pintarDorso(div, s, 2); div.dataset.vista = '2'; }
+  else { div.classList.remove('girada'); div.dataset.vista = '0'; }
+}
+
+function mensajeFlotante(txt) {
+  const m = $('mensajeCanje');
+  const hoja = document.querySelector('.leaf.on');
+  if (hoja) {
+    const aviso = document.createElement('div');
+    aviso.className = 'msg err';
+    aviso.textContent = txt;
+    aviso.style.textAlign = 'center';
+    aviso.style.animation = 'turn .4s';
+    hoja.querySelector('h2').after(aviso);
+    setTimeout(() => aviso.remove(), 2200);
+  }
+}
+
+function renderSellos() {
+  SECCIONES.forEach(sec => {
+    const cont = $(sec.grid);
+    const lista = SELLOS.filter(s => s.cat === sec.cat);
+    cont.innerHTML = '';
+    cont.style.gridTemplateRows = `repeat(${Math.ceil(lista.length / 2)}, minmax(0, 1fr))`;
+    lista.forEach(s => cont.appendChild(crearEstampa(s, SELLOS.indexOf(s) + 1, false)));
+  });
+}
+
+function renderProgreso() {
+  const n = sellados.size, pct = n / META_TOTAL;
+  $('conteo').textContent = n;
+  $('anillo').style.strokeDashoffset = 326.7 * (1 - pct);
+  $('topTexto').textContent = `${viajero ? viajero + ' · ' : ''}${n} de ${META_TOTAL} estampas`;
+  $('topBarra').style.width = pct * 100 + '%';
+  $('premio6').classList.toggle('unlocked', n >= META_DESCUENTO);
+  $('premio6').textContent = n >= META_DESCUENTO ? '¡Descuento desbloqueado en parques y atractivos!' : `Completa ${META_DESCUENTO} estampas y obtén descuento en entradas a parques.`;
+  $('premio12').classList.toggle('unlocked', n >= META_TOTAL);
+}
+
+function mostrarCodigosDemo() {
+  const lista = Object.keys(CODIGOS).filter(c => !usados.has(c)).slice(0, 3);
+  $('codigosDemo').textContent = lista.length ? 'Códigos de prueba: ' + lista.join(' · ') : 'Todos los códigos de prueba fueron usados.';
+}
+
+function mostrar(i) {
+  pagina = Math.max(0, Math.min(hojas.length - 1, i));
+  hojas.forEach((h, k) => h.classList.toggle('on', k === pagina));
+  $('ant').disabled = pagina === 0;
+  $('sig').disabled = pagina === hojas.length - 1;
+  [...$('dots').children].forEach((b, k) => b.classList.toggle('on', k === pagina));
+  hojas[pagina].scrollTop = 0;
+}
+hojas.forEach((h, k) => {
+  const b = document.createElement('button');
+  b.setAttribute('aria-label', h.dataset.title);
+  b.onclick = () => mostrar(k);
+  $('dots').appendChild(b);
+});
+$('ant').onclick = () => mostrar(pagina - 1);
+$('sig').onclick = () => mostrar(pagina + 1);
+document.addEventListener('keydown', e => {
+  if (!abierto || e.target.matches('input')) return;
+  if (e.key === 'ArrowRight') mostrar(pagina + 1);
+  if (e.key === 'ArrowLeft') mostrar(pagina - 1);
+});
+$('hojas').addEventListener('touchstart', e => { inicioX = e.touches[0].clientX; }, { passive: true });
+$('hojas').addEventListener('touchend', e => {
+  if (inicioX === null) return;
+  const dx = e.changedTouches[0].clientX - inicioX;
+  if (Math.abs(dx) > 60 && !e.target.closest('.estampa, input, form')) mostrar(pagina + (dx < 0 ? 1 : -1));
+  inicioX = null;
+});
+
+$('formRegistro').addEventListener('submit', e => {
+  e.preventDefault();
+  const nombre = $('nombre').value.trim();
+  if (nombre.length < 2) return;
+  viajero = nombre;
+  numero = 'LV-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+  fecha = fechaHoy();
+  guardar();
+  renderProgreso();
+  mostrar(1);
+});
+
+$('formCanje').addEventListener('submit', e => {
+  e.preventDefault();
+  const msg = $('mensajeCanje');
+  const fail = t => { msg.className = 'msg err'; msg.textContent = t; };
+  if (!viajero) return fail('Primero emite tu pasaporte en la primera hoja.');
+  const codigo = $('codigo').value.trim().toUpperCase();
+
+  if (codigo === MASTER) {
+    SELLOS.forEach(s => { if (!sellados.has(s.id)) sellados.set(s.id, fechaHoy()); });
+    $('codigo').value = '';
+    msg.className = 'msg ok';
+    msg.textContent = '¡Modo prueba: todas las estampas desbloqueadas!';
+    renderSellos(); renderProgreso(); guardar();
+    setTimeout(fiesta, 500);
+    return;
+  }
+
+  const id = CODIGOS[codigo];
+  if (!id) return fail('Código no válido. Revísalo e intenta de nuevo.');
+  if (usados.has(codigo)) return fail('Este código ya fue usado.');
+  if (sellados.has(id)) return fail('Ya tienes la estampa de esta zona.');
+
+  usados.add(codigo);
+  sellados.set(id, fechaHoy());
+  const idx = SELLOS.findIndex(x => x.id === id);
+  const s = SELLOS[idx];
+  const viejo = document.querySelector(`.estampa[data-id="${id}"]`);
+  if (viejo) viejo.replaceWith(crearEstampa(s, idx + 1, true));
+  msg.className = 'msg ok';
+  msg.textContent = `¡Estampa obtenida: ${s.nombre}!`;
+  $('codigo').value = '';
+  renderProgreso();
+  mostrarCodigosDemo();
+  guardar();
+  if (sellados.size === META_DESCUENTO || sellados.size === META_TOTAL) setTimeout(fiesta, 900);
+});
+
+function fiesta() {
+  const cont = $('fiesta'); cont.innerHTML = '';
+  const div = document.createElement('div'); div.className = 'burst';
+  const colores = ['#c9a24a', '#f3dc95', '#ffffff', '#a3262a', '#1e6fa8', '#2e8b57'];
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('i');
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colores[i % colores.length];
+    p.style.animationDelay = Math.random() * .5 + 's';
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    div.appendChild(p);
+  }
+  cont.appendChild(div);
+  setTimeout(() => cont.innerHTML = '', 3000);
+}
+
+$('descargar').addEventListener('click', () => {
+  const c = document.createElement('canvas'); c.width = 900; c.height = 640;
+  const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 640); g.addColorStop(0, '#2d6aa3'); g.addColorStop(1, '#13305a');
+  x.fillStyle = g; x.fillRect(0, 0, 900, 640);
+  x.fillStyle = '#f7efdc'; x.fillRect(40, 120, 820, 480);
+  x.fillStyle = '#13305a'; x.font = 'bold 36px Georgia'; x.fillText('PASAPORTE · LAGOS Y VOLCANES', 60, 90);
+  x.font = '20px Georgia'; x.fillStyle = '#2a2118';
+  x.fillText(`Titular: ${viajero}     N.º ${numero}     Emitido: ${fecha}`, 60, 160);
+  x.fillText(`Estampas obtenidas: ${sellados.size} de ${META_TOTAL}`, 60, 190);
+  SELLOS.forEach((s, i) => {
+    const cx = 120 + (i % 4) * 200, cy = 290 + Math.floor(i / 4) * 120;
+    x.beginPath(); x.arc(cx, cy, 42, 0, Math.PI * 2);
+    if (sellados.has(s.id)) { x.fillStyle = s.color; x.fill(); }
+    else { x.strokeStyle = '#b8a77f'; x.setLineDash([4, 4]); x.lineWidth = 2; x.stroke(); x.setLineDash([]); }
+    x.fillStyle = sellados.has(s.id) ? '#2a2118' : '#9a8c70'; x.font = '15px Georgia'; x.textAlign = 'center';
+    x.fillText(s.nombre.length > 24 ? s.nombre.slice(0, 22) + '…' : s.nombre, cx, cy + 64);
+    if (sellados.has(s.id)) { x.font = '12px Georgia'; x.fillStyle = '#7a2e1e'; x.fillText(sellados.get(s.id), cx, cy + 82); }
+    x.textAlign = 'left';
+  });
+  const a = document.createElement('a');
+  a.download = 'pasaporte-lagos-y-volcanes.png'; a.href = c.toDataURL('image/png'); a.click();
+});
+
+// Inicio: restaura el pasaporte guardado si existe
+if (cargar()) $('nombre').value = viajero;
+renderSellos();
+renderProgreso();
+mostrarCodigosDemo();
+hojas.forEach(h => h.classList.remove('on'));
+</script>
+</body>
+</html>
